@@ -11,6 +11,27 @@ This repository is intentionally shaped as a portfolio-grade cloud solutions pro
 - workflow execution logging for safe dry-run demos
 - Docker and Terraform scaffolding for local development and GCP deployment
 
+## Why This Project Matters
+
+Cloud operations teams deal with alerts, audit events, failed deliveries, and infrastructure changes across many Google Cloud services. Handling those events manually is slow, inconsistent, and difficult to audit.
+
+This project solves that by:
+
+- receiving cloud events through a central ingestion API
+- converting different GCP event formats into one normalized internal model
+- evaluating automation rules in a consistent way
+- recording the outcome of each automation workflow for traceability
+- providing a foundation for notifications, incident creation, and remediation workflows
+
+## Portfolio Highlights
+
+- GCP-first architecture with `Cloud Run`, `Eventarc`, `Pub/Sub`, and `Cloud SQL` deployment direction
+- backend service design using `FastAPI`, `Pydantic`, and `SQLAlchemy`
+- event normalization for multiple GCP-originated event patterns
+- idempotent processing with deduplication keys
+- rule-driven workflow execution model
+- local developer setup with Docker and test coverage for the MVP flow
+
 ## MVP Capabilities
 
 - accept GCP CloudEvents through `POST /api/v1/events/ingest`
@@ -37,6 +58,18 @@ This repository is intentionally shaped as a portfolio-grade cloud solutions pro
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the design overview.
 
+## Tech Stack
+
+- Python 3.12
+- FastAPI
+- Pydantic v2
+- SQLAlchemy 2.x
+- SQLite for lightweight local startup
+- PostgreSQL for production-style local and cloud environments
+- Docker Compose
+- Terraform
+- Pytest
+
 ## Quick Start
 
 1. Create a virtual environment and install dependencies.
@@ -62,6 +95,21 @@ uvicorn app.main:app --reload
 4. Open the interactive docs.
 
 - [Swagger UI](http://127.0.0.1:8000/docs)
+
+## Project Structure
+
+```text
+app/
+  api/                FastAPI routes and dependencies
+  core/               application settings
+  db/                 database setup and session management
+  models/             SQLAlchemy models
+  schemas/            API and domain schemas
+  services/           ingestion, normalization, rules, workflows, connectors
+docs/                 architecture notes
+infra/terraform/      starter GCP infrastructure
+tests/                API and ingestion tests
+```
 
 ## Docker Compose
 
@@ -124,6 +172,13 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/events/ingest"
 ```powershell
 pytest
 ```
+
+The current test suite validates:
+
+- health endpoint behavior
+- monitoring event ingestion and rule matching
+- audit log event ingestion and incident workflow creation
+- duplicate event conflict handling
 
 ## Suggested Next Enhancements
 
