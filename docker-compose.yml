@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: gcp-cloud-ops-api
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/cloud_ops
+      ALLOWED_INGEST_API_KEYS: dev-ingest-key
+      DEFAULT_GCP_PROJECT_ID: demo-project
+      DRY_RUN: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: gcp-cloud-ops-postgres
+    environment:
+      POSTGRES_DB: cloud_ops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

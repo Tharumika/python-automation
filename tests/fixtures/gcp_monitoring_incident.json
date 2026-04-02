@@ -1,0 +1,17 @@
+{
+  "data": {
+    "incident": {
+      "state": "open",
+      "summary": "High CPU usage detected on a production VM"
+    },
+    "resource": {
+      "type": "gce_instance",
+      "labels": {
+        "project_id": "demo-project",
+        "instance_id": "vm-prod-01",
+        "location": "us-central1-a"
+      },
+      "name": "projects/demo-project/zones/us-central1-a/instances/vm-prod-01"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "data": {
+    "resourceName": "projects/demo-project",
+    "resource": {
+      "type": "project",
+      "labels": {
+        "project_id": "demo-project",
+        "location": "global"
+      }
+    },
+    "protoPayload": {
+      "serviceName": "cloudresourcemanager.googleapis.com",
+      "methodName": "SetIamPolicy",
+      "resourceName": "projects/demo-project",
+      "authenticationInfo": {
+        "principalEmail": "admin@example.com"
+      }
+    }
+  }
+}
