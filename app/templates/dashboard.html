@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ app_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ request.url_for('static', path='css/dashboard.css') }}"
+    />
+  </head>
+  <body data-api-prefix="{{ api_prefix }}">
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">GCP Event Command Center</p>
+          <h1>{{ app_name }}</h1>
+          <p class="hero-text">
+            A visual control room for cloud events, rule matching, and workflow execution.
+            Watch incoming signals, see how the rule engine reacts, and inspect the actions
+            your automation hub is ready to take.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-link" href="/docs" target="_blank" rel="noreferrer">Open API Docs</a>
+            <button id="refresh-button" type="button">Refresh Live Data</button>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <div class="signal-card">
+            <span>Pipeline</span>
+            <strong>Cloud Event -> Normalize -> Match -> Act</strong>
+          </div>
+          <div class="signal-grid">
+            <article>
+              <span>Mode</span>
+              <strong id="mode-pill">Dry Run</strong>
+            </article>
+            <article>
+              <span>Last Sync</span>
+              <strong id="last-sync">Waiting...</strong>
+            </article>
+            <article>
+              <span>View</span>
+              <strong>Frontend Dashboard</strong>
+            </article>
+            <article>
+              <span>Source</span>
+              <strong>Google Cloud Events</strong>
+            </article>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="High level metrics">
+        <article class="stat-card accent-coral">
+          <span>Raw Events</span>
+          <strong id="total-raw-events">0</strong>
+          <p>Original payloads captured from the cloud.</p>
+        </article>
+        <article class="stat-card accent-gold">
+          <span>Normalized Events</span>
+          <strong id="total-normalized-events">0</strong>
+          <p>Events cleaned into a single internal format.</p>
+        </article>
+        <article class="stat-card accent-sky">
+          <span>Enabled Rules</span>
+          <strong id="enabled-rules">0 / 0</strong>
+          <p>Operational automations currently ready to react.</p>
+        </article>
+        <article class="stat-card accent-mint">
+          <span>Workflow Runs</span>
+          <strong id="total-workflow-runs">0</strong>
+          <p>Recorded actions created by matching rules.</p>
+        </article>
+      </section>
+
+      <section class="overview-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Severity Radar</p>
+              <h2>What kind of events are landing?</h2>
+            </div>
+            <p id="headline-text" class="panel-copy">Loading dashboard summary...</p>
+          </div>
+          <div class="meter-list" id="severity-breakdown"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Workflow Outcomes</p>
+              <h2>How did the engine respond?</h2>
+            </div>
+            <p class="panel-copy">Simulated, completed, or failed actions appear here.</p>
+          </div>
+          <div class="meter-list" id="workflow-breakdown"></div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Scenario Launcher</p>
+              <h2>Generate demo events instantly</h2>
+            </div>
+            <span class="mono-chip">No real cloud event required</span>
+          </div>
+          <div class="launcher-grid">
+            <button class="launch-card" data-scenario="monitoring" type="button">
+              <span>Monitoring Alert</span>
+              <strong>High CPU incident</strong>
+              <p>Simulates a Cloud Monitoring alert opening on a VM.</p>
+            </button>
+            <button class="launch-card" data-scenario="audit" type="button">
+              <span>Audit Log</span>
+              <strong>IAM policy change</strong>
+              <p>Simulates a high-risk Cloud Audit Log event.</p>
+            </button>
+            <button class="launch-card" data-scenario="pubsub" type="button">
+              <span>Pub/Sub Delivery</span>
+              <strong>Subscriber retry pressure</strong>
+              <p>Simulates a messaging event with dead-letter style pressure.</p>
+            </button>
+          </div>
+          <div id="simulator-feedback" class="simulator-feedback">
+            Click a scenario to inject a sample event into the pipeline.
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Integration Status</p>
+              <h2>Outbound action mode</h2>
+            </div>
+          </div>
+          <div class="explain-steps">
+            <div>
+              <span>A</span>
+              <p>Right now the app runs safely in dry-run mode by default.</p>
+            </div>
+            <div>
+              <span>B</span>
+              <p>Add `NOTIFICATION_WEBHOOK_URL` or `INCIDENT_WEBHOOK_URL` in `.env` for real outbound delivery.</p>
+            </div>
+            <div>
+              <span>C</span>
+              <p>Set `DRY_RUN=false` only when you want live webhook calls instead of simulated actions.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel wide-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Recent Events</p>
+              <h2>Latest signals from the cloud</h2>
+            </div>
+            <span class="mono-chip">Normalized timeline</span>
+          </div>
+          <div id="recent-events" class="timeline-list empty-state">
+            Waiting for events...
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Live Rulebook</p>
+              <h2>What rules are armed?</h2>
+            </div>
+            <span class="mono-chip">Priority ordered</span>
+          </div>
+          <div id="rule-list" class="card-stack empty-state">Waiting for rules...</div>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Workflow Feed</p>
+              <h2>Automation actions</h2>
+            </div>
+            <span class="mono-chip">Execution trail</span>
+          </div>
+          <div id="workflow-list" class="card-stack empty-state">
+            Waiting for workflow runs...
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">How To Read This</p>
+              <h2>Simple mental model</h2>
+            </div>
+          </div>
+          <div class="explain-steps">
+            <div>
+              <span>1</span>
+              <p>The cloud says something happened.</p>
+            </div>
+            <div>
+              <span>2</span>
+              <p>This app cleans the event into one format.</p>
+            </div>
+            <div>
+              <span>3</span>
+              <p>The rule engine decides what action fits.</p>
+            </div>
+            <div>
+              <span>4</span>
+              <p>The workflow record shows what the system would do.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <script src="{{ request.url_for('static', path='js/dashboard.js') }}"></script>
+  </body>
+</html>

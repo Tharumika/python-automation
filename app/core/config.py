@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     dry_run: bool = True
     log_level: str = "INFO"
     webhook_timeout_seconds: int = 10
+    notification_webhook_url: str | None = None
+    incident_webhook_url: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -15,7 +15,7 @@ def execute_workflows(
     rules: list[Rule],
     settings: Settings,
 ) -> list[WorkflowRun]:
-    connector = NotificationConnector()
+    connector = NotificationConnector(timeout_seconds=settings.webhook_timeout_seconds)
     workflow_runs: list[WorkflowRun] = []
 
     for rule in rules:
@@ -70,6 +70,7 @@ def dispatch_rule_action(
             subject=f"[{event.severity.upper()}] Cloud automation event",
             message=summary,
             dry_run=settings.dry_run,
+            webhook_url=settings.notification_webhook_url,
         )
 
     if rule.action_type == "create_incident":
@@ -78,6 +79,7 @@ def dispatch_rule_action(
             title=f"Investigate {event.event_type}",
             description=summary,
             dry_run=settings.dry_run,
+            webhook_url=settings.incident_webhook_url,
         )
 
     return {

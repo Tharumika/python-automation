@@ -92,7 +92,11 @@ Copy-Item .env.example .env
 uvicorn app.main:app --reload
 ```
 
-4. Open the interactive docs.
+4. Open the dashboard.
+
+- [Dashboard](http://127.0.0.1:8000/)
+
+5. Open the interactive docs if you want to test APIs directly.
 
 - [Swagger UI](http://127.0.0.1:8000/docs)
 
@@ -158,8 +162,12 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/events/ingest"
 
 ## Main Endpoints
 
+- `GET /`
+- `GET /dashboard/summary`
 - `GET /health`
 - `POST /api/v1/events/ingest`
+- `GET /api/v1/simulator/scenarios`
+- `POST /api/v1/simulator/events/{scenario}`
 - `GET /api/v1/events/raw`
 - `GET /api/v1/events/normalized`
 - `GET /api/v1/rules`
@@ -175,10 +183,38 @@ pytest
 
 The current test suite validates:
 
+- dashboard page and summary endpoint
 - health endpoint behavior
 - monitoring event ingestion and rule matching
 - audit log event ingestion and incident workflow creation
 - duplicate event conflict handling
+- simulator-driven event generation
+
+## Built-In Demo Mode
+
+The dashboard now includes one-click scenario launchers for:
+
+- monitoring alert
+- audit log event
+- Pub/Sub delivery pressure
+
+This means you can demo the app visually without waiting for a real Google Cloud event source.
+
+## Optional Real Webhook Integrations
+
+You still do not need real keys for the project to work in demo mode. If you want live outbound actions later, add these to `.env`:
+
+```env
+NOTIFICATION_WEBHOOK_URL=https://your-webhook-endpoint.example
+INCIDENT_WEBHOOK_URL=https://your-webhook-endpoint.example
+DRY_RUN=false
+```
+
+Recommended flow:
+
+- keep `DRY_RUN=true` while building and testing
+- use the dashboard scenario launcher to populate the UI
+- switch to real webhook delivery only when you want live external actions
 
 ## Suggested Next Enhancements
 
