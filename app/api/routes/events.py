@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
 from app.models import NormalizedEvent, RawEvent
-from app.schemas.events import NormalizedEventRead, RawEventRead
+from app.schemas.events import NormalizedEventDetailRead, NormalizedEventRead, RawEventRead
 from app.schemas.workflow_runs import EventIngestResponse
 from app.services.events import (
     IngestionAuthenticationError,
@@ -60,3 +60,14 @@ def list_normalized_events(
         .limit(limit)
         .all()
     )
+
+
+@router.get("/normalized/{event_id}", response_model=NormalizedEventDetailRead)
+def get_normalized_event(
+    event_id: str,
+    db: Session = Depends(get_db),
+) -> NormalizedEventDetailRead:
+    event = db.query(NormalizedEvent).filter(NormalizedEvent.id == event_id).one_or_none()
+    if event is None:
+        raise HTTPException(status_code=404, detail="Normalized event not found.")
+    return event

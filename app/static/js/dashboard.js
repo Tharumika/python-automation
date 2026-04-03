@@ -15,6 +15,11 @@ document.querySelectorAll("[data-scenario]").forEach((button) => {
   });
 });
 
+document.getElementById("rule-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await createRule();
+});
+
 function formatLabel(value) {
   return value
     .replaceAll("_", " ")
@@ -88,6 +93,7 @@ function renderRecentEvents(events) {
         </div>
       </div>
     `;
+    item.addEventListener("click", () => inspectEvent(event.id, event.event_type));
     container.appendChild(item);
   });
 }
@@ -118,6 +124,7 @@ function renderWorkflowRuns(runs) {
         <span>Rule ${run.rule_id.slice(0, 8)}</span>
       </div>
     `;
+    item.addEventListener("click", () => inspectWorkflow(run.id));
     container.appendChild(item);
   });
 }
@@ -145,11 +152,30 @@ function renderRules(rules) {
         </span>
       </div>
       <h3>${rule.name}</h3>
+      <p>${rule.description || "No description set for this rule."}</p>
       <div class="card-meta">
         <span>${rule.event_type_filter || "all events"}</span>
         <span>${rule.severity_filter || "all severities"}</span>
+        <span>${rule.action_target || "target n/a"}</span>
+      </div>
+      <div class="card-actions">
+        <button class="secondary-button" data-inspect-rule="${rule.id}" type="button">Inspect</button>
+        <button class="secondary-button" data-toggle-rule="${rule.id}" data-next-enabled="${rule.enabled ? "false" : "true"}" type="button">
+          ${rule.enabled ? "Disable" : "Enable"}
+        </button>
       </div>
     `;
+    item.querySelector("[data-inspect-rule]")?.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await inspectRule(rule.id);
+    });
+    item.querySelector("[data-toggle-rule]")?.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      const target = event.currentTarget;
+      const enabled = target.dataset.nextEnabled === "true";
+      await toggleRule(rule.id, enabled);
+    });
+    item.addEventListener("click", () => inspectRule(rule.id));
     container.appendChild(item);
   });
 }
@@ -225,6 +251,98 @@ async function triggerScenario(button, scenario) {
     console.error(error);
   } finally {
     button.removeAttribute("disabled");
+  }
+}
+
+async function inspectEvent(eventId, eventType) {
+  await loadInspector(`/api/v1/events/normalized/${eventId}`, `Event detail for ${eventType}`);
+}
+
+async function inspectWorkflow(workflowId) {
+  await loadInspector(`/api/v1/workflow-runs/${workflowId}`, `Workflow detail for ${workflowId.slice(0, 8)}`);
+}
+
+async function inspectRule(ruleId) {
+  await loadInspector(`/api/v1/rules/${ruleId}`, `Rule detail for ${ruleId.slice(0, 8)}`);
+}
+
+async function loadInspector(url, summary) {
+  const summaryNode = document.getElementById("inspector-summary");
+  const jsonNode = document.getElementById("inspector-json");
+  summaryNode.textContent = `Loading: ${summary}`;
+  jsonNode.textContent = "Loading...";
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Inspector failed: ${response.status}`);
+    }
+    const data = await response.json();
+    summaryNode.textContent = summary;
+    jsonNode.textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    summaryNode.textContent = "Inspector failed to load.";
+    jsonNode.textContent = error.message;
+  }
+}
+
+async function createRule() {
+  const feedback = document.getElementById("rule-form-feedback");
+  const form = document.getElementById("rule-form");
+  const payload = {
+    name: document.getElementById("rule-name").value.trim(),
+    description: document.getElementById("rule-description").value.trim() || null,
+    event_type_filter: document.getElementById("rule-event-type").value.trim() || null,
+    severity_filter: document.getElementById("rule-severity").value.trim() || null,
+    action_type: document.getElementById("rule-action-type").value,
+    action_target: document.getElementById("rule-action-target").value.trim() || null,
+    priority: Number(document.getElementById("rule-priority").value || 50),
+    enabled: document.getElementById("rule-enabled").checked,
+  };
+
+  feedback.textContent = "Creating rule...";
+
+  try {
+    const response = await fetch(`${apiPrefix}/rules`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(errorBody || `Rule create failed: ${response.status}`);
+    }
+    const data = await response.json();
+    feedback.textContent = `Rule created: ${data.name}`;
+    form.reset();
+    document.getElementById("rule-priority").value = 50;
+    document.getElementById("rule-enabled").checked = true;
+    await loadDashboard();
+    await inspectRule(data.id);
+  } catch (error) {
+    feedback.textContent = `Rule create error: ${error.message}`;
+  }
+}
+
+async function toggleRule(ruleId, enabled) {
+  const feedback = document.getElementById("rule-form-feedback");
+  feedback.textContent = `${enabled ? "Enabling" : "Disabling"} rule...`;
+
+  try {
+    const response = await fetch(`${apiPrefix}/rules/${ruleId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    });
+    if (!response.ok) {
+      throw new Error(`Rule update failed: ${response.status}`);
+    }
+    const data = await response.json();
+    feedback.textContent = `Rule updated: ${data.name} is now ${data.enabled ? "enabled" : "disabled"}.`;
+    await loadDashboard();
+    await inspectRule(data.id);
+  } catch (error) {
+    feedback.textContent = `Rule update error: ${error.message}`;
   }
 }
 

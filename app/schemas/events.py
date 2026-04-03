@@ -50,3 +50,16 @@ class NormalizedEventRead(BaseModel):
     metadata_json: dict[str, Any]
     created_at: datetime
 
+
+class EventWorkflowSummary(BaseModel):
+    id: str
+    action_type: str
+    status: str
+    dry_run: bool
+    started_at: datetime
+    rule_id: str
+
+
+class NormalizedEventDetailRead(NormalizedEventRead):
+    raw_event: RawEventRead
+    workflow_runs: list[EventWorkflowSummary]

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
 from app.models import WorkflowRun
-from app.schemas.workflow_runs import WorkflowRunRead
+from app.schemas.workflow_runs import WorkflowRunDetailRead, WorkflowRunRead
 
 router = APIRouter(prefix="/workflow-runs", tags=["workflow-runs"])
 
@@ -21,3 +21,14 @@ def list_workflow_runs(
         .limit(limit)
         .all()
     )
+
+
+@router.get("/{workflow_run_id}", response_model=WorkflowRunDetailRead)
+def get_workflow_run(
+    workflow_run_id: str,
+    db: Session = Depends(get_db),
+) -> WorkflowRunDetailRead:
+    workflow_run = db.query(WorkflowRun).filter(WorkflowRun.id == workflow_run_id).one_or_none()
+    if workflow_run is None:
+        raise HTTPException(status_code=404, detail="Workflow run not found.")
+    return workflow_run

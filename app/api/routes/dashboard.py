@@ -95,9 +95,11 @@ def dashboard_summary(
             {
                 "id": rule.id,
                 "name": rule.name,
+                "description": rule.description,
                 "enabled": rule.enabled,
                 "priority": rule.priority,
                 "action_type": rule.action_type,
+                "action_target": rule.action_target,
                 "severity_filter": rule.severity_filter,
                 "event_type_filter": rule.event_type_filter,
             }

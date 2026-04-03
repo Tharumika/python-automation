@@ -200,6 +200,16 @@ The dashboard now includes one-click scenario launchers for:
 
 This means you can demo the app visually without waiting for a real Google Cloud event source.
 
+## Control Center Stage
+
+The dashboard now also supports:
+
+- creating rules from the frontend
+- enabling or disabling rules from the rule list
+- inspecting full event, workflow, and rule payloads from the UI
+
+This makes the app feel much closer to a real operations console instead of only a backend demo.
+
 ## Optional Real Webhook Integrations
 
 You still do not need real keys for the project to work in demo mode. If you want live outbound actions later, add these to `.env`:

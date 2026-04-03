@@ -29,9 +29,11 @@ class DashboardWorkflowCard(BaseModel):
 class DashboardRuleCard(BaseModel):
     id: str
     name: str
+    description: str | None
     enabled: bool
     priority: int
     action_type: str
+    action_target: str | None
     severity_filter: str | None
     event_type_filter: str | None
 

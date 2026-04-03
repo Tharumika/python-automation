@@ -202,6 +202,76 @@
         <article class="panel">
           <div class="panel-heading">
             <div>
+              <p class="section-label">Rule Studio</p>
+              <h2>Create and arm a rule</h2>
+            </div>
+          </div>
+          <form id="rule-form" class="rule-form">
+            <label>
+              <span>Rule name</span>
+              <input id="rule-name" name="name" type="text" placeholder="Notify on storage failures" required />
+            </label>
+            <label>
+              <span>Description</span>
+              <textarea id="rule-description" name="description" rows="2" placeholder="What this rule is for"></textarea>
+            </label>
+            <div class="form-split">
+              <label>
+                <span>Severity filter</span>
+                <input id="rule-severity" name="severity_filter" type="text" placeholder="high,critical" />
+              </label>
+              <label>
+                <span>Priority</span>
+                <input id="rule-priority" name="priority" type="number" min="1" value="50" />
+              </label>
+            </div>
+            <label>
+              <span>Event type filter</span>
+              <input id="rule-event-type" name="event_type_filter" type="text" placeholder="google.cloud.storage.object.v1.finalized" />
+            </label>
+            <div class="form-split">
+              <label>
+                <span>Action type</span>
+                <select id="rule-action-type" name="action_type">
+                  <option value="notify">notify</option>
+                  <option value="create_incident">create_incident</option>
+                </select>
+              </label>
+              <label>
+                <span>Action target</span>
+                <input id="rule-action-target" name="action_target" type="text" placeholder="platform-ops" />
+              </label>
+            </div>
+            <label class="checkbox-row">
+              <input id="rule-enabled" name="enabled" type="checkbox" checked />
+              <span>Enable this rule immediately</span>
+            </label>
+            <button class="submit-button" type="submit">Create Rule</button>
+            <div id="rule-form-feedback" class="simulator-feedback">
+              Create custom automation rules directly from the dashboard.
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Inspector</p>
+              <h2>Open one event or workflow in detail</h2>
+            </div>
+            <span class="mono-chip">Deep view</span>
+          </div>
+          <div id="inspector-summary" class="inspector-summary">
+            Click an event, workflow, or rule card to inspect details here.
+          </div>
+          <pre id="inspector-json" class="json-viewer">No item selected.</pre>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
               <p class="section-label">How To Read This</p>
               <h2>Simple mental model</h2>
             </div>

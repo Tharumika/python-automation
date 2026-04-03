@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 from app.schemas.events import NormalizedEventRead, RawEventRead
+from app.schemas.rules import RuleRead
 
 
 class WorkflowRunRead(BaseModel):
@@ -29,3 +30,7 @@ class EventIngestResponse(BaseModel):
     matched_rule_names: list[str]
     workflow_runs: list[WorkflowRunRead]
 
+
+class WorkflowRunDetailRead(WorkflowRunRead):
+    normalized_event: NormalizedEventRead
+    rule: RuleRead
