@@ -2,7 +2,8 @@ const body = document.body;
 const apiPrefix = body.dataset.apiPrefix || "/api/v1";
 
 const severityOrder = ["critical", "high", "medium", "info"];
-const workflowOrder = ["simulated", "completed", "failed"];
+const workflowOrder = ["queued", "running", "simulated", "completed", "failed"];
+const queueOrder = ["queued", "running", "completed", "failed"];
 
 document.getElementById("refresh-button")?.addEventListener("click", () => {
   loadDashboard();
@@ -18,6 +19,10 @@ document.querySelectorAll("[data-scenario]").forEach((button) => {
 document.getElementById("rule-form")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   await createRule();
+});
+
+document.getElementById("process-queue-button")?.addEventListener("click", async () => {
+  await processQueue();
 });
 
 function formatLabel(value) {
@@ -198,6 +203,8 @@ async function loadDashboard() {
     document.getElementById("enabled-rules").textContent =
       `${data.enabled_rules} / ${data.total_rules}`;
     document.getElementById("total-workflow-runs").textContent = data.total_workflow_runs;
+    document.getElementById("processing-mode").textContent = data.processing_mode;
+    document.getElementById("queue-depth-label").textContent = `Queue depth: ${data.queue_depth}`;
     document.getElementById("mode-pill").textContent =
       (data.workflow_breakdown.completed || 0) > 0 ? "Mixed Mode" : "Dry Run";
     document.getElementById("last-sync").textContent = new Date().toLocaleTimeString();
@@ -216,6 +223,13 @@ async function loadDashboard() {
       "workflow",
       data.total_workflow_runs,
     );
+    renderMeters(
+      "queue-breakdown",
+      data.queue_breakdown,
+      queueOrder,
+      "workflow",
+      Math.max(data.total_workflow_runs, data.queue_depth),
+    );
     renderRecentEvents(data.recent_events);
     renderWorkflowRuns(data.recent_workflow_runs);
     renderRules(data.rules);
@@ -225,6 +239,29 @@ async function loadDashboard() {
     console.error(error);
   } finally {
     refreshButton?.removeAttribute("disabled");
+  }
+}
+
+async function processQueue() {
+  const feedback = document.getElementById("queue-feedback");
+  const button = document.getElementById("process-queue-button");
+  button?.setAttribute("disabled", "true");
+  feedback.textContent = "Processing queued workflow jobs...";
+
+  try {
+    const response = await fetch(`${apiPrefix}/workflow-runs/process-queue?limit=20`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      throw new Error(`Queue processing failed: ${response.status}`);
+    }
+    const data = await response.json();
+    feedback.textContent = `Processed ${data.processed_count} queued workflow job(s).`;
+    await loadDashboard();
+  } catch (error) {
+    feedback.textContent = `Queue processing error: ${error.message}`;
+  } finally {
+    button?.removeAttribute("disabled");
   }
 }
 

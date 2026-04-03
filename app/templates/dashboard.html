@@ -104,6 +104,49 @@
         </article>
       </section>
 
+      <section class="overview-grid">
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Worker Queue</p>
+              <h2>How many jobs are waiting?</h2>
+            </div>
+            <span id="processing-mode" class="mono-chip">Loading mode...</span>
+          </div>
+          <div class="queue-actions">
+            <button id="process-queue-button" type="button">Process Queue Now</button>
+            <span id="queue-depth-label" class="mono-chip">Queue depth: 0</span>
+          </div>
+          <div class="meter-list" id="queue-breakdown"></div>
+          <div id="queue-feedback" class="simulator-feedback">
+            Queue state will appear here.
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">Worker Story</p>
+              <h2>Why this stage matters</h2>
+            </div>
+          </div>
+          <div class="explain-steps">
+            <div>
+              <span>Q</span>
+              <p>New workflow jobs are persisted in a queue table first.</p>
+            </div>
+            <div>
+              <span>W</span>
+              <p>A worker processes queued jobs and updates workflow status.</p>
+            </div>
+            <div>
+              <span>E</span>
+              <p>This makes the platform feel closer to a real production automation service.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
       <section class="content-grid">
         <article class="panel">
           <div class="panel-heading">

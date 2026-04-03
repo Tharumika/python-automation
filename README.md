@@ -210,6 +210,17 @@ The dashboard now also supports:
 
 This makes the app feel much closer to a real operations console instead of only a backend demo.
 
+## Queue Processing Stage
+
+The platform now persists workflow jobs into a queue layer before processing them. By default the app auto-processes queued jobs so the demo stays smooth, but you can also trigger queue processing manually from the dashboard or API.
+
+This stage adds:
+
+- persisted workflow task queue
+- manual worker processing endpoint
+- queue depth and worker status visibility in the dashboard
+- a more production-like automation pipeline story for interviews
+
 ## Optional Real Webhook Integrations
 
 You still do not need real keys for the project to work in demo mode. If you want live outbound actions later, add these to `.env`:

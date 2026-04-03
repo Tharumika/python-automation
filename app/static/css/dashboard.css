@@ -126,7 +126,8 @@ body::before {
 }
 
 .hero-actions a,
-.hero-actions button {
+.hero-actions button,
+.queue-actions button {
   border-radius: 999px;
   padding: 12px 18px;
   border: 1px solid rgba(27, 26, 24, 0.12);
@@ -141,13 +142,15 @@ body::before {
   background: linear-gradient(135deg, var(--ink), #42382e);
 }
 
-.hero-actions button {
+.hero-actions button,
+.queue-actions button {
   background: rgba(255, 255, 255, 0.55);
   color: var(--ink);
 }
 
 .hero-actions a:hover,
-.hero-actions button:hover {
+.hero-actions button:hover,
+.queue-actions button:hover {
   transform: translateY(-1px);
 }
 
@@ -322,6 +325,10 @@ body::before {
 }
 
 .fill-simulated,
+.fill-queued,
+.status-queued,
+.fill-running,
+.status-running,
 .status-simulated {
   background: linear-gradient(135deg, #2f6977, var(--sky));
   color: #fff;
@@ -468,6 +475,14 @@ body::before {
   color: var(--muted);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.86rem;
+}
+
+.queue-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .rule-form {

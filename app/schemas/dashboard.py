@@ -40,13 +40,16 @@ class DashboardRuleCard(BaseModel):
 
 class DashboardSummaryResponse(BaseModel):
     headline: str
+    processing_mode: str
     total_raw_events: int
     total_normalized_events: int
     enabled_rules: int
     total_rules: int
     total_workflow_runs: int
+    queue_depth: int
     severity_breakdown: dict[str, int]
     workflow_breakdown: dict[str, int]
+    queue_breakdown: dict[str, int]
     recent_events: list[DashboardEventCard]
     recent_workflow_runs: list[DashboardWorkflowCard]
     rules: list[DashboardRuleCard]

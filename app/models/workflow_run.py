@@ -34,3 +34,9 @@ class WorkflowRun(Base):
         back_populates="workflow_runs",
     )
     rule: Mapped["Rule"] = relationship("Rule", back_populates="workflow_runs")
+    workflow_task: Mapped["WorkflowTask | None"] = relationship(
+        "WorkflowTask",
+        back_populates="workflow_run",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )

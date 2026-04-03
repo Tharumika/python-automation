@@ -34,3 +34,8 @@ class EventIngestResponse(BaseModel):
 class WorkflowRunDetailRead(WorkflowRunRead):
     normalized_event: NormalizedEventRead
     rule: RuleRead
+
+
+class WorkflowQueueProcessResponse(BaseModel):
+    processed_count: int
+    processed_workflow_run_ids: list[str]

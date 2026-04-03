@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     webhook_timeout_seconds: int = 10
     notification_webhook_url: str | None = None
     incident_webhook_url: str | None = None
+    auto_process_workflow_queue: bool = True
+    workflow_queue_batch_size: int = 20
 
     model_config = SettingsConfigDict(
         env_file=".env",

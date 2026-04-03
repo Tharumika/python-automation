@@ -52,6 +52,8 @@ class NormalizedEventRead(BaseModel):
 
 
 class EventWorkflowSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     action_type: str
     status: str

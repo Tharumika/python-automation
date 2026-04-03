@@ -9,7 +9,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
-from app.models import NormalizedEvent, RawEvent, Rule, WorkflowRun
+from app.models import NormalizedEvent, RawEvent, Rule, WorkflowRun, WorkflowTask
 from app.schemas.dashboard import DashboardSummaryResponse
 
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parents[2] / "templates"))
@@ -50,21 +50,35 @@ def dashboard_summary(
 
     severity_counter = Counter(event.severity for event in normalized_events)
     workflow_counter = Counter(run.status for run in workflow_runs)
+    queue_counter = Counter(
+        status
+        for (status,) in db.query(WorkflowTask.status).all()
+    )
 
     return DashboardSummaryResponse(
         headline="Live view of event ingestion, rule matching, and workflow execution.",
+        processing_mode=(
+            "auto-processing queue"
+            if request.app.state.settings.auto_process_workflow_queue
+            else "manual queue processing"
+        ),
         total_raw_events=db.query(RawEvent).count(),
         total_normalized_events=db.query(NormalizedEvent).count(),
         enabled_rules=sum(1 for rule in rules if rule.enabled),
         total_rules=len(rules),
         total_workflow_runs=db.query(WorkflowRun).count(),
+        queue_depth=queue_counter.get("queued", 0),
         severity_breakdown={
             key: severity_counter.get(key, 0)
             for key in ("critical", "high", "medium", "info")
         },
         workflow_breakdown={
             key: workflow_counter.get(key, 0)
-            for key in ("simulated", "completed", "failed")
+            for key in ("queued", "running", "simulated", "completed", "failed")
+        },
+        queue_breakdown={
+            key: queue_counter.get(key, 0)
+            for key in ("queued", "running", "completed", "failed")
         },
         recent_events=[
             {

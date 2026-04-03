@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.base import Base
-from app.models import normalized_event, raw_event, rule, workflow_run  # noqa: F401
+from app.models import normalized_event, raw_event, rule, workflow_run, workflow_task  # noqa: F401
 
 
 class DatabaseManager:
