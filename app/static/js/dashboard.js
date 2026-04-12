@@ -25,6 +25,14 @@ document.getElementById("process-queue-button")?.addEventListener("click", async
   await processQueue();
 });
 
+document.getElementById("test-notify-button")?.addEventListener("click", async () => {
+  await runIntegrationTest("notify");
+});
+
+document.getElementById("test-incident-button")?.addEventListener("click", async () => {
+  await runIntegrationTest("incident");
+});
+
 function formatLabel(value) {
   return value
     .replaceAll("_", " ")
@@ -185,6 +193,46 @@ function renderRules(rules) {
   });
 }
 
+function renderIntegrationStatus(status) {
+  const container = document.getElementById("integration-status-list");
+  container.classList.remove("empty-state");
+  container.innerHTML = "";
+
+  const entries = [
+    {
+      label: "Slack Incoming Webhook",
+      value: status.slack_configured ? `Configured -> ${status.slack_destination_label}` : "Not configured",
+    },
+    {
+      label: "Notification Webhook",
+      value: status.notification_webhook_configured ? "Configured" : "Not configured",
+    },
+    {
+      label: "Incident Webhook",
+      value: status.incident_webhook_configured ? "Configured" : "Not configured",
+    },
+    {
+      label: "Execution Mode",
+      value: status.mode,
+    },
+  ];
+
+  entries.forEach((entry) => {
+    const item = document.createElement("article");
+    item.className = "card-item";
+    item.innerHTML = `
+      <div class="chip-row">
+        <span class="rule-chip">${entry.label}</span>
+      </div>
+      <h3>${entry.value}</h3>
+    `;
+    container.appendChild(item);
+  });
+
+  document.getElementById("integration-mode-chip").textContent =
+    status.dry_run ? "Dry Run Mode" : "Live Delivery Mode";
+}
+
 async function loadDashboard() {
   const refreshButton = document.getElementById("refresh-button");
   refreshButton?.setAttribute("disabled", "true");
@@ -233,12 +281,29 @@ async function loadDashboard() {
     renderRecentEvents(data.recent_events);
     renderWorkflowRuns(data.recent_workflow_runs);
     renderRules(data.rules);
+    await loadIntegrationStatus();
   } catch (error) {
     document.getElementById("headline-text").textContent =
       "Dashboard data could not be loaded yet.";
     console.error(error);
   } finally {
     refreshButton?.removeAttribute("disabled");
+  }
+}
+
+async function loadIntegrationStatus() {
+  try {
+    const response = await fetch(`${apiPrefix}/integrations/status`);
+    if (!response.ok) {
+      throw new Error(`Integration status failed: ${response.status}`);
+    }
+    const data = await response.json();
+    renderIntegrationStatus(data);
+  } catch (error) {
+    const container = document.getElementById("integration-status-list");
+    container.classList.add("empty-state");
+    container.textContent = "Integration status unavailable.";
+    document.getElementById("integration-mode-chip").textContent = "Status unavailable";
   }
 }
 
@@ -315,11 +380,42 @@ async function loadInspector(url, summary) {
       throw new Error(`Inspector failed: ${response.status}`);
     }
     const data = await response.json();
-    summaryNode.textContent = summary;
+    if (data.result_payload?.connector_type) {
+      summaryNode.textContent =
+        `${summary} | ${data.result_payload.connector_type} -> ${data.result_payload.delivery}`;
+    } else {
+      summaryNode.textContent = summary;
+    }
     jsonNode.textContent = JSON.stringify(data, null, 2);
   } catch (error) {
     summaryNode.textContent = "Inspector failed to load.";
     jsonNode.textContent = error.message;
+  }
+}
+
+async function runIntegrationTest(testType) {
+  const feedback = document.getElementById("integration-feedback");
+  const buttonId = testType === "notify" ? "test-notify-button" : "test-incident-button";
+  const button = document.getElementById(buttonId);
+  button?.setAttribute("disabled", "true");
+  feedback.textContent = `Sending ${testType} integration test through the queue...`;
+
+  try {
+    const response = await fetch(`${apiPrefix}/integrations/test/${testType}`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      throw new Error(`Integration test failed: ${response.status}`);
+    }
+    const data = await response.json();
+    feedback.textContent =
+      `Test ${data.test_type}: ${data.connector_type} -> ${data.delivery} (${data.workflow_status}).`;
+    await loadDashboard();
+    await inspectWorkflow(data.workflow_run_id);
+  } catch (error) {
+    feedback.textContent = `Integration test error: ${error.message}`;
+  } finally {
+    button?.removeAttribute("disabled");
   }
 }
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api.routes import dashboard, events, health, rules, simulator, workflow_runs
+from app.api.routes import dashboard, events, health, integrations, rules, simulator, workflow_runs
 from app.core.config import Settings, get_settings
 from app.db.session import DatabaseManager
 from app.services.rules.seed import seed_default_rules
@@ -45,6 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(dashboard.router)
     app.include_router(health.router)
     app.include_router(events.router, prefix=active_settings.api_prefix)
+    app.include_router(integrations.router, prefix=active_settings.api_prefix)
     app.include_router(rules.router, prefix=active_settings.api_prefix)
     app.include_router(simulator.router, prefix=active_settings.api_prefix)
     app.include_router(workflow_runs.router, prefix=active_settings.api_prefix)

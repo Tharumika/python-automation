@@ -166,6 +166,9 @@ Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8000/api/v1/events/ingest"
 - `GET /dashboard/summary`
 - `GET /health`
 - `POST /api/v1/events/ingest`
+- `GET /api/v1/integrations/status`
+- `POST /api/v1/integrations/test/notify`
+- `POST /api/v1/integrations/test/incident`
 - `GET /api/v1/simulator/scenarios`
 - `POST /api/v1/simulator/events/{scenario}`
 - `GET /api/v1/events/raw`
@@ -226,6 +229,8 @@ This stage adds:
 You still do not need real keys for the project to work in demo mode. If you want live outbound actions later, add these to `.env`:
 
 ```env
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+SLACK_DESTINATION_LABEL=platform-ops
 NOTIFICATION_WEBHOOK_URL=https://your-webhook-endpoint.example
 INCIDENT_WEBHOOK_URL=https://your-webhook-endpoint.example
 DRY_RUN=false
@@ -236,6 +241,26 @@ Recommended flow:
 - keep `DRY_RUN=true` while building and testing
 - use the dashboard scenario launcher to populate the UI
 - switch to real webhook delivery only when you want live external actions
+
+## Live Integrations Stage
+
+The app now supports a real outbound delivery phase for portfolio demos and live testing:
+
+- Slack incoming webhook is the primary notification integration
+- generic notification webhook is the fallback when Slack is not configured
+- incident webhook remains available for incident-style actions
+- integration status and test-send controls are available from the dashboard
+
+Notification delivery precedence:
+
+1. `SLACK_WEBHOOK_URL`
+2. `NOTIFICATION_WEBHOOK_URL`
+3. local record-only fallback
+
+Safe default:
+
+- `DRY_RUN=true` keeps all test sends simulated
+- set `DRY_RUN=false` only when you want real outbound calls
 
 ## Suggested Next Enhancements
 

@@ -4,6 +4,8 @@ def test_dashboard_page_renders(client):
     assert response.status_code == 200
     assert "GCP Cloud Ops Automation Hub" in response.text
     assert "Event Command Center" in response.text
+    assert "Send Test Notification" in response.text
+    assert "Send Test Incident" in response.text
 
 
 def test_dashboard_summary_returns_expected_shape(client):

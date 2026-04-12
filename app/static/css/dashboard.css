@@ -581,6 +581,10 @@ body::before {
   margin-top: 14px;
 }
 
+.integration-actions {
+  margin-top: 18px;
+}
+
 .explain-steps div {
   display: grid;
   grid-template-columns: 44px 1fr;

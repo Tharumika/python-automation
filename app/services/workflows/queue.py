@@ -116,24 +116,30 @@ def dispatch_rule_action(
     settings: Settings,
     connector: NotificationConnector,
 ) -> dict:
+    is_test_traffic = bool(event.metadata_json.get("test_traffic"))
+    summary_prefix = "[TEST] " if is_test_traffic else ""
     summary = (
-        f"{event.severity.upper()} {event.event_type} for project={event.project_id} "
+        f"{summary_prefix}{event.severity.upper()} {event.event_type} for project={event.project_id} "
         f"resource={event.resource_id or 'n/a'}"
     )
+    if is_test_traffic:
+        summary = f"{summary}. Demo/test traffic generated from the integration controls."
 
     if rule.action_type == "notify":
-        return connector.send(
+        return connector.send_notification(
             target=rule.action_target or "platform-ops",
-            subject=f"[{event.severity.upper()}] Cloud automation event",
+            subject=f"{summary_prefix}[{event.severity.upper()}] Cloud automation event",
             message=summary,
             dry_run=settings.dry_run,
-            webhook_url=settings.notification_webhook_url,
+            slack_webhook_url=settings.slack_webhook_url,
+            notification_webhook_url=settings.notification_webhook_url,
+            slack_destination_label=settings.slack_destination_label,
         )
 
     if rule.action_type == "create_incident":
         return connector.create_incident(
             queue=rule.action_target or "security-response",
-            title=f"Investigate {event.event_type}",
+            title=f"{summary_prefix}Investigate {event.event_type}",
             description=summary,
             dry_run=settings.dry_run,
             webhook_url=settings.incident_webhook_url,

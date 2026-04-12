@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     dry_run: bool = True
     log_level: str = "INFO"
     webhook_timeout_seconds: int = 10
+    slack_webhook_url: str | None = None
+    slack_destination_label: str = "platform-ops"
     notification_webhook_url: str | None = None
     incident_webhook_url: str | None = None
     auto_process_workflow_queue: bool = True

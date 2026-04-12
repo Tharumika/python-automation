@@ -184,20 +184,17 @@
               <p class="section-label">Integration Status</p>
               <h2>Outbound action mode</h2>
             </div>
+            <span id="integration-mode-chip" class="mono-chip">Loading integrations...</span>
           </div>
-          <div class="explain-steps">
-            <div>
-              <span>A</span>
-              <p>Right now the app runs safely in dry-run mode by default.</p>
-            </div>
-            <div>
-              <span>B</span>
-              <p>Add `NOTIFICATION_WEBHOOK_URL` or `INCIDENT_WEBHOOK_URL` in `.env` for real outbound delivery.</p>
-            </div>
-            <div>
-              <span>C</span>
-              <p>Set `DRY_RUN=false` only when you want live webhook calls instead of simulated actions.</p>
-            </div>
+          <div id="integration-status-list" class="card-stack empty-state">
+            Loading integration status...
+          </div>
+          <div class="card-actions integration-actions">
+            <button id="test-notify-button" class="submit-button" type="button">Send Test Notification</button>
+            <button id="test-incident-button" class="secondary-button" type="button">Send Test Incident</button>
+          </div>
+          <div id="integration-feedback" class="simulator-feedback">
+            Test sends will go through the queued worker path.
           </div>
         </article>
       </section>
